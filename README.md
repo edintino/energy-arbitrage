@@ -33,8 +33,9 @@ This project optimises battery usage for industrial-scale energy arbitrage, spec
 
 * Constant, symmetric charging and discharging rates.
 * Linear efficiency (no battery degradation curve considered).
-* Price forecasts include Gaussian noise.
+* Charge/Discharge efficiency applied (only efficiency*E stored and sold).
 * Fixed two-day planning horizon.
+* Price forecasts include Gaussian noise.
 * Single market action (buy or sell) per timestep.
 * No market volume or transmission fee constraints.
 
@@ -86,6 +87,15 @@ Number of slots selected ($n$): approximately equals battery capacity divided by
 * Compare the sophisticated DRO MILP approach to the greedy baseline.
 * Evaluate relative improvement clearly in profit terms and operational efficiency.
 
+|                            | Greedy Daily-Arbitrage Baseline  | Deterministic Multi-Market Optimisation |
+|----------------------------|----------------------------------|-----------------------------------------|
+| **Profit (€)**             | 12,500.12                        | **19,807.67**                           |
+| **Final SOC (%)**          | 30.00                            | **35.66**                               |
+
+With relative improvement of 58.46% in return and 5% more charge relative to the simplistic greedy approach baseline.
+
+![SOC & Cumulative Gain Chart](image.png)
+
 ---
 
 ## 📊 Visualisation
@@ -93,21 +103,18 @@ Number of slots selected ($n$): approximately equals battery capacity divided by
 Interactive visual comparison provided through a Plotly-generated chart:
 
 * SoC timelines
-* Action indicators
-* Market selections
-
-Chart is saved as `battery_schedule_comparison.html`.
+* Cumulative Gain timeline
 
 ---
 
 ## 📂 Project Structure
 
-* **`baseline.py`**: Implements greedy strategy.
 * **`config.py`**: Defines battery parameters and simulation settings.
-* **`main.py`**: Orchestrates simulation, optimisation, and comparison.
-* **`optimization.py`**: Core DRO MILP optimisation algorithm.
-* **`plotting.py`**: Generates comparative visualisations.
 * **`simulation.py`**: Produces realistic market price forecasts.
+* **`baseline.py`**: Implements greedy strategy.
+* **`optimization.py`**: Core DRO MILP optimisation algorithm.
+* **`main.py`**: Orchestrates simulation, optimisation, and comparison.
+* **`plotting.py`**: Generates comparative visualisations.
 
 ---
 
