@@ -94,7 +94,7 @@ Number of slots selected ($n$): approximately equals battery capacity divided by
 
 With relative improvement of 58.46% in return and 5% more charge relative to the simplistic greedy approach baseline.
 
-![SOC & Cumulative Gain Chart](image.png)
+![SOC & Cumulative Gain Chart](assets/image.png)
 
 ---
 
