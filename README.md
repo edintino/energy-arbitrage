@@ -11,6 +11,7 @@ This project optimises battery usage for industrial-scale energy arbitrage, spec
 * **Risk-Averse Optimisation (DRO MILP)**: Uses Mixed Integer Linear Programming (MILP) for robust decision-making.
 * **Greedy Baseline Strategy:** A simple heuristic for baseline comparison.
 
+* **Data Source:** https://ember-energy.org/data/european-wholesale-electricity-price-data/
 ---
 
 ## 🎯 Goals & Benefits
