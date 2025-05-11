@@ -7,6 +7,8 @@ def greedy_daily_arbitrage(sim_df: pd.DataFrame, params=BATTERY):
     p_max = params.charge_rate
     soc0 = params.initial_soc
     eta = params.efficiency
+    soc_min = params.battery_capacity_buffer * params.battery_capacity
+    soc_max = (1 - params.battery_capacity_buffer) * params.battery_capacity
 
     T = len(sim_df)
     days = sim_df.index.normalize()
@@ -25,13 +27,13 @@ def greedy_daily_arbitrage(sim_df: pd.DataFrame, params=BATTERY):
 
         for i, ts in enumerate(idx):
             t = loc[i]
-            if ts in to_charge and soc[t] < cap:
-                e = min(p_max, cap - soc[t])
-                sched[t] = -e / eta
-                soc[t+1] = soc[t] + e
+            if ts in to_charge and soc[t] < soc_max:
+                e = min(p_max, (soc_max - soc[t]) / eta)
+                sched[t] = -e
+                soc[t+1] = soc[t] + e * eta
                 market[t] = grp.columns[grp.iloc[i].argmin()]
-            elif ts in to_discharge and soc[t] > 0:
-                e = min(p_max, soc[t])
+            elif ts in to_discharge and soc[t] > soc_min:
+                e = min(p_max, soc[t] - soc_min)
                 sched[t] = e * eta
                 soc[t+1] = soc[t] - e
                 market[t] = grp.columns[grp.iloc[i].argmax()]
