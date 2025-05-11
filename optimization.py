@@ -2,9 +2,8 @@
 import pandas as pd
 from pulp import (
     LpProblem, LpVariable, LpBinary, LpContinuous, LpMaximize,
-    lpSum, value, LpStatus, PULP_CBC_CMD, GLPK_CMD, PulpSolverError
-)
-from config import BATTERY, RISK_AVERSION
+    lpSum, value, LpStatus, PULP_CBC_CMD)
+from config import SEED, BATTERY, RISK_AVERSION
 
 def optimize_battery_DRO(mu_df: pd.DataFrame, sigma_df: pd.DataFrame,
                          params=BATTERY, risk=RISK_AVERSION):
@@ -29,10 +28,10 @@ def optimize_battery_DRO(mu_df: pd.DataFrame, sigma_df: pd.DataFrame,
     for t in range(T):
         prob += soc[t+1] == (
             soc[t]
-            - params.efficiency * lpSum(x_plus[t][m]  for m in markets)
+            - lpSum(x_plus[t][m]  for m in markets)
             + params.efficiency * lpSum(x_minus[t][m] for m in markets)
         )
-        prob += lpSum(z[t][m] for m in markets) == 1
+        prob += lpSum(z[t][m] for m in markets) <= 1
         for m in markets:
             prob += x_plus[t][m] <= params.charge_rate * z[t][m]
             prob += x_minus[t][m] <= params.charge_rate * z[t][m]
@@ -42,16 +41,12 @@ def optimize_battery_DRO(mu_df: pd.DataFrame, sigma_df: pd.DataFrame,
     prob += soc[T] >= params.final_soc_target
 
     prob += lpSum(
-        (mu_df.iloc[t, i] - risk * sigma_df.iloc[t, i]) * x_plus[t][m]
+        (mu_df.iloc[t, i] - risk * sigma_df.iloc[t, i]) * params.efficiency * x_plus[t][m]
         - (mu_df.iloc[t, i] + risk * sigma_df.iloc[t, i]) * x_minus[t][m]
         for t in range(T) for i, m in enumerate(markets)
     )
 
-    # solve (CBC → GLPK fallback)
-    try:
-        prob.solve(PULP_CBC_CMD(msg=False))
-    except PulpSolverError:
-        prob.solve(GLPK_CMD(msg=False))
+    prob.solve(PULP_CBC_CMD(msg=False, options=[f"randomSeed {SEED}"]))
 
     status = LpStatus[prob.status]
     profit = value(prob.objective)
@@ -63,7 +58,7 @@ def optimize_battery_DRO(mu_df: pd.DataFrame, sigma_df: pd.DataFrame,
         for m in markets:
             if value(z[t][m]) > 0.5:
                 mk  = m
-                net = params.efficiency * value(x_plus[t][m]) - value(x_minus[t][m])
+                net = params.efficiency * (value(x_plus[t][m]) - value(x_minus[t][m]))
         schedule.append(net)
         chosen.append(mk)
 

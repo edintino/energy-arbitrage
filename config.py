@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 
+SEED = 7843
+
 @dataclass
 class BatteryParams:
     battery_capacity: float
